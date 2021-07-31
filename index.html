@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html class="h-100">
+  <head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <style>
+      body > div {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body class="h-100">
+    <div class="container ">
+      <form id="newClientForm" class="w-100" onsubmit="handleFormSubmit(this)" autocomplete="off">
+        <div class="row">
+          <div class="col-4">
+            <div class="form-group">
+              <label for="id">CI/RUC</label>
+              <input class="form-control" id="id" placeholder="Ingrese CI o RUC del cliente" autocomplete="off" required>
+            </div>
+          </div>
+          <div class="col">
+            <div class="form-group">
+              <label for="name">Nombre</label>
+              <div class="d-flex">
+                <input class="form-control" id="name" placeholder="Ingrese nombre del cliente" autocomplete="off" required>
+                <button type="button" class="btn btn-secondary ml-3" onclick="autocompleteClient()">Buscar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+    <script>
+    
+      let id = document.getElementById('id')
+      let name = document.getElementById('name')
+    
+      id.select()
+
+      function autocompleteClient() {
+        if(id.value !== ''){
+          let url = 'https://srienlinea.sri.gob.ec/movil-servicios/api/v1.0/deudas/porIdentificacion/' + id.value + '/?tipoPersona=N&resultados=30&_=1618072954591'
+          console.log(url)
+          fetch(url)
+            .then(response => response.json())
+            .then(data => {
+              name.value = data.contribuyente.nombreComercial
+            })
+        }
+        if(name.value !== ''){
+          let completeName = name.value.split(" ")
+          let subUrl = ''
+          for(let i = 0; i < completeName.length - 1; i++ ) {
+            subUrl = subUrl + completeName[i] + '%20'
+          }
+          subUrl = subUrl + completeName[completeName.length - 1]
+          let url = 'https://srienlinea.sri.gob.ec/movil-servicios/api/v1.0/deudas/porDenominacion/' + subUrl + '/?tipoPersona=N&resultados=30&_=1618078279834'
+
+          fetch(url)
+            .then(response => response.json())
+            .then(data => {
+              id.value = data[0].identificacion
+            })
+        }
+      }
+
+      function preventFormSubmit() {
+        let forms = document.querySelectorAll('form')
+        for (var i = 0; i < forms.length; i++) {
+          forms[i].addEventListener('submit', function(event) {
+            event.preventDefault()
+          });
+        }
+      }
+      window.addEventListener('load', preventFormSubmit)
+      
+      function handleFormSubmit(formObject) {
+        sendNewClientForm(formObject)
+        document.getElementById('newClientForm').reset()
+      }
+      
+      function sendNewClientForm(form) {
+        google.script.run.processNewClientForm(form.id.value, form.name.value, form.address.value, form.phone.value)
+      }      
+    </script>
+
+  </body>
+</html>
+
