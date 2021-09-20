@@ -85,11 +85,7 @@
       function handleFormSubmit(formObject) {
         sendNewClientForm(formObject)
         document.getElementById('newClientForm').reset()
-      }
-      
-      function sendNewClientForm(form) {
-        google.script.run.processNewClientForm(form.id.value, form.name.value, form.address.value, form.phone.value)
-      }      
+      }     
     </script>
 
   </body>
